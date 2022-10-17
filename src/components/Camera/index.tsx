@@ -26,19 +26,24 @@ const Camera: React.FC<CameraProps> = (props) => {
       open={props.modalType != 'not-use'}
       centered
       destroyOnClose
+      width="min-content"
       title="请拍摄"
       okText={'确认拍照'}
       cancelText={'关闭'}
       onOk={async () => {
         // @ts-ignore
         const imageSrc = webcamRef?.current?.getScreenshot();
+        // @ts-ignore
+        const value = await window.electronExpose.saveImage(props.modalType, imageSrc);
         if (props.modalType == 'front') {
           setImageFront({
             imageBase64: imageSrc,
+            imageFileUrl: value,
           });
         } else if (props.modalType == 'back') {
           setImageBack({
             imageBase64: imageSrc,
+            imageFileUrl: value,
           });
         }
         props.onCloseModal();
@@ -49,7 +54,8 @@ const Camera: React.FC<CameraProps> = (props) => {
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        onUserMediaError={() => {
+        onUserMediaError={(reason) => {
+          console.log(reason);
           openNotificationWithIcon();
           props.onCloseModal();
         }}
