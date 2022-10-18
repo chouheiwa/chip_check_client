@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据标签</title>
+</head>
+<body>
+<!-- Include Label Studio stylesheet -->
+<link href="script/main.label-studio.css" rel="stylesheet">
+
+<!-- Create the Label Studio container -->
+<div id="label-studio"></div>
+
+<!-- Include the Label Studio library -->
+<script src="script/main.label-studio.js"></script>
+<!-- Initialize Label Studio -->
+<script>
+  function getQueryVariable(variable)
+  {
+    const query = window.location.search.substring(1);
+    const vars = query.split("&");
+    for (let i=0; i<vars.length; i++) {
+      const pair = vars[i].split("=");
+      if(pair[0] === variable){return pair[1];}
+    }
+    return false;
+  }
+  async function initLabelStudio() {
+    const {imageUrl, imageAnnotationUrl} = await electronLabelImage.getImagePath(getQueryVariable('imageType'))
+    console.log(imageUrl, imageAnnotationUrl);
+    let data = await fetch(imageAnnotationUrl);
+  }
+  initLabelStudio();
+    const last = [
+        {
+            "original_width": 2242,
+            "original_height": 2802,
+            "image_rotation": 0,
+            "value": {
+                "x": 39.91596638655462,
+                "y": 0.33670033670033667,
+                "width": 30.672268907563026,
+                "height": 24.579124579124578,
+                "rotation": 0,
+                "rectanglelabels": [
+                    "World"
+                ]
+            },
+            "id": "bRz82q9GNt",
+            "from_name": "tag",
+            "to_name": "img",
+            "type": "rectanglelabels",
+            "origin": "manual"
+        }
+    ];
+
+  const labelStudio = new LabelStudio('label-studio', {
+    config: `
+      <View>
+        <Image name="img" value="$image"></Image>
+        <RectangleLabels name="tag" toName="img">
+        </RectangleLabels>
+      </View>
+    `,
+
+    interfaces: [
+      "panel",
+      "topbar",
+      "update",
+      // "submit",
+      "controls",
+      "instruction",
+      "side-column",
+      // "annotations:menu",
+      // "annotations:add-new",
+      // "annotations:delete",
+      // "predictions:menu",
+    ],
+    task: {
+      annotations: [
+        {result: last}
+      ],
+      predictions: [],
+      id: 1,
+      data: {
+        image: "https://htx-misc.s3.amazonaws.com/opensource/label-studio/examples/images/nick-owuor-astro-nic-visuals-wDifg5xc9Z4-unsplash.jpg"
+      }
+    },
+    onLabelStudioLoad: function (LS) {
+      console.log(11111)
+      const c = LS.annotationStore.addAnnotation({
+        userGenerate: false,
+      });
+      LS.annotationStore.selectAnnotation(c.id);
+      console.log(c)
+    },
+    onSubmitAnnotation: function (LS, annotations) {
+      console.log(annotations.serializeAnnotation());
+    },
+    onUpdateAnnotation: function (LS, annotations, data) {
+      console.log(annotations.serializeAnnotation());
+    }
+  });
+</script>
+</body>
+</html>
